@@ -1,4 +1,4 @@
-# app.py  –  AquaGenius WWTP Designer (refactored)
+# app.py  –  AquaGenius WWTP Designer (refactored & fixed)
 # ------------------------------------------------------------------
 # 1.  pip install -r requirements.txt
 # 2.  streamlit run app.py
@@ -18,7 +18,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 import graphviz
 
 # ------------------------- CONSTANTS ------------------------------
-@dataclass(slots=True)
+@dataclass
 class C:
     # Conversions
     MGD_TO_M3D: float = 3785.41
@@ -40,15 +40,8 @@ class C:
     O2_AIR: float = 0.232
     RHO_AIR: float = 1.225
 
-    # Chemicals
-    ALUM_P: float = 9.7
-    METH_N: float = 2.86
-    NAOH_H2S: float = 2.5
-    NAOCL_H2S: float = 4.5
-    H2SO4_NH3: float = 0.6
-
 # ------------------------- DATA MODEL -----------------------------
-@dataclass(slots=True)
+@dataclass
 class Influent:
     flow: float           # raw value from user
     unit: str             # "MGD", "MLD", "m³/day"
@@ -63,7 +56,7 @@ class Influent:
                             "MLD": C.MLD_TO_M3D,
                             "m³/day": 1.0}[self.unit]
 
-@dataclass(slots=True)
+@dataclass
 class Sizing:
     tech: str
     volume: float
@@ -168,7 +161,7 @@ st.set_page_config("AquaGenius", "🌊", layout="wide")
 with st.sidebar:
     st.title("⚙️ Influent Criteria")
     unit = st.selectbox("Unit", ["MGD", "MLD", "m³/day"])
-    flow = st.number_input(f"Flow ({unit})", 0.1, 1e6, 1.0)
+    flow = st.number_input(f"Flow ({unit})", 0.1, 1e6, 1.0, format="%.2f")
     bod  = st.number_input("BOD (mg/L)", 50, 1000, 250)
     tss  = st.number_input("TSS (mg/L)", 50, 1000, 220)
     tkn  = st.number_input("TKN (mg/L)", 10, 200, 40)
@@ -181,6 +174,7 @@ if run:
 
 if "inf" in st.session_state:
     inf = st.session_state["inf"]
+
     tabs = st.tabs(["CAS", "IFAS", "MBR", "MBBR"])
     techs = [calc_cas, calc_ifas, calc_mbr, calc_mbbr]
 
